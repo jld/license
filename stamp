@@ -1,0 +1,41 @@
+#!/bin/sh
+set -e -u
+
+die() {
+  echo "$@" >&2
+  exit 1
+}
+
+if [ -z "${NAME:-}" ] && type git >/dev/null 2>&1
+then
+  NAME="$(git config --get user.name) <$(git config --get user.email)>" || true
+fi
+
+copyright="Copyright (c) $YEAR $NAME"
+dir=$(dirname $0)
+[ -d "$dir" ] || die "Can't find license tools; no directory $dir"
+license="$dir/$1.license"
+[ -r "$license" ] || die "No license named $1"
+shift 1
+
+for file in "$@"
+do
+  case $file in
+    (*.c|*.h|*.cc|*.hh|*.cpp|*.hpp|*.m)
+      filetype=c ;;
+    (*.sh)
+      filetype=sh ;;
+    (*.[1-9])
+      filetype=man ;;
+    (*)
+      die "Unable to determine file type of $file"
+  esac
+  if fgrep -q "$copyright" "$file"
+  then
+    echo "File $file already labelled; skipping." >&2
+    continue
+  fi
+  echo "Labelling $file as type $filetype." >&2
+  { echo "$copyright"; echo; cat $license; } | sed -f "$dir/to-$filetype.sed" \
+  | sed -f "$dir/pfxize.sed" | ed $file
+done
