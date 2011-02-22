@@ -27,6 +27,8 @@ do
       filetype=sh ;;
     (*.[1-9])
       filetype=man ;;
+    (LICENSE|COPYING)
+      filetype=none ;;
     (*)
       die "Unable to determine file type of $file"
   esac
