@@ -1,0 +1,7 @@
+A smell shell script for license-stamping stuff.
+
+Usage: path/to/stamp <license> <files>
+
+Requires $YEAR be set, and $NAME if you're not using Git.
+
+Doesn't have very many license declarations or file types yet.
